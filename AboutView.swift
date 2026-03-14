@@ -4,7 +4,7 @@ import SwiftUI
 private let kAuthorName   = "Built by George"
 private let kAuthorBio    = "Fully Open-Source"
 private let kGitHubURL    = "https://github.com/wckyhq/Ascend"
-private let kAppVersion   = "1.0"
+private let kAppVersion   = "1.0.0"
 // ─────────────────────────────────────────────────────────────────────────────
 
 struct AboutView: View {
