@@ -25,7 +25,6 @@ struct PopoverView: View {
         )
     }
 
-    // MARK: - Status Header
 
     private var statusSection: some View {
         VStack(spacing: 6) {
@@ -36,7 +35,6 @@ struct PopoverView: View {
             Text(statusLabel)
                 .font(.title3.bold())
 
-            // Countdown row — fixed height so the card doesn't jump
             Group {
                 if appState.isRunning && !appState.countdownText.isEmpty {
                     Label("Next in \(appState.countdownText)", systemImage: "timer")
@@ -47,7 +45,7 @@ struct PopoverView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } else {
-                    Text(" ") // placeholder
+                    Text(" ")
                         .font(.caption)
                 }
             }
@@ -63,7 +61,6 @@ struct PopoverView: View {
         return appState.isStanding ? "Standing" : "Sitting"
     }
 
-    // MARK: - Action Buttons
 
     private var actionSection: some View {
         VStack(spacing: 8) {
@@ -84,7 +81,6 @@ struct PopoverView: View {
         .padding(14)
     }
 
-    // MARK: - Footer
 
     private var footerSection: some View {
         HStack {
@@ -104,10 +100,12 @@ struct PopoverView: View {
 
             Spacer()
 
-            Button("Quit", action: onQuit)
-                .buttonStyle(.plain)
-                .foregroundColor(.secondary)
-                .font(.callout)
+            Button(action: onQuit) {
+                Label("Quit", systemImage: "power")
+                    .font(.callout)
+            }
+            .buttonStyle(.plain)
+            .foregroundColor(.secondary)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

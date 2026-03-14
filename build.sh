@@ -24,12 +24,39 @@ swiftc \
   -o "$CONTENTS/MacOS/$APP_NAME" \
   -framework Cocoa \
   -framework SwiftUI \
+  -framework ServiceManagement \
   -O
 
 cp "$SCRIPT_DIR/Info.plist" "$CONTENTS/Info.plist"
 
+# Ad-hoc sign so SMAppService can register a login item
+codesign --sign - --force --deep "$APP_BUNDLE"
+
 echo ""
-echo "✓ Built: $APP_BUNDLE"
+echo "✓ Built & signed: $APP_BUNDLE"
+
+# Create DMG
+DMG_NAME="$APP_NAME.dmg"
+DMG_PATH="$BUILD_DIR/$DMG_NAME"
+DMG_STAGING="$BUILD_DIR/dmg-staging"
+
+echo "Creating $DMG_NAME..."
+
+rm -rf "$DMG_STAGING"
+mkdir -p "$DMG_STAGING"
+cp -r "$APP_BUNDLE" "$DMG_STAGING/"
+ln -s /Applications "$DMG_STAGING/Applications"
+
+hdiutil create \
+  -volname "$APP_NAME" \
+  -srcfolder "$DMG_STAGING" \
+  -ov \
+  -format UDZO \
+  "$DMG_PATH"
+
+rm -rf "$DMG_STAGING"
+
 echo ""
-echo "Launch:   open \"$APP_BUNDLE\""
-echo "Install:  mv \"$APP_BUNDLE\" /Applications/"
+echo "✓ DMG:   $DMG_PATH"
+echo ""
+echo "Install: open \"$DMG_PATH\""

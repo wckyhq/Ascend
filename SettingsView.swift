@@ -11,6 +11,7 @@ struct SettingsView: View {
 
             Divider()
 
+            launchSection
             intervalSection
             soundSection
             alertSection
@@ -76,6 +77,21 @@ struct SettingsView: View {
     }
 
 
+    private var launchSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("System", systemImage: "power")
+                .font(.headline)
+
+            Toggle("Open at login", isOn: $appState.launchAtLogin)
+                .toggleStyle(.switch)
+
+            Text("Ascend will start automatically when you log in.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+
+
     private var iconSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Menu Bar Icons", systemImage: "square.grid.2x2")
@@ -109,7 +125,6 @@ struct SettingsView: View {
 
                 Spacer()
 
-                // Live preview
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Preview")
                         .font(.caption)

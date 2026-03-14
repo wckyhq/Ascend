@@ -126,7 +126,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         panel.setFrameTopLeftPoint(NSPoint(x: x, y: screen.minY))
         panel.makeKeyAndOrderFront(nil)
 
-        // Close on any click outside
         eventMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown]
         ) { [weak self] _ in self?.hidePanel() }
@@ -203,7 +202,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 
     private func showVisualAlert(icon: String, title: String, subtitle: String) {
-        // Dismiss any existing alert
         alertDismissTimer?.invalidate()
         alertPanel?.orderOut(nil)
 

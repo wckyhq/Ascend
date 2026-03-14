@@ -1,5 +1,6 @@
 import Foundation
 import Cocoa
+import ServiceManagement
 
 struct IconPreset: Identifiable {
     let id = UUID()
@@ -13,7 +14,6 @@ class AppState: ObservableObject {
     @Published var isRunning: Bool = true
     @Published var countdownText: String = ""
 
-    // Settings (persisted via UserDefaults)
     @Published var intervalMinutes: Double {
         didSet { UserDefaults.standard.set(intervalMinutes, forKey: "intervalMinutes") }
     }
@@ -31,6 +31,9 @@ class AppState: ObservableObject {
     }
     @Published var sittingIcon: String {
         didSet { UserDefaults.standard.set(sittingIcon, forKey: "sittingIcon") }
+    }
+    @Published var launchAtLogin: Bool {
+        didSet { setLaunchAtLogin(launchAtLogin) }
     }
 
     var interval: TimeInterval { intervalMinutes * 60 }
@@ -55,7 +58,6 @@ class AppState: ObservableObject {
         let saved = UserDefaults.standard.double(forKey: "intervalMinutes")
         self.intervalMinutes = saved > 0 ? saved : 30
 
-        // Migrate from single soundName if present
         let legacy = UserDefaults.standard.string(forKey: "soundName") ?? "Ping"
         self.standSoundName = UserDefaults.standard.string(forKey: "standSoundName") ?? legacy
         self.sitSoundName   = UserDefaults.standard.string(forKey: "sitSoundName")   ?? legacy
@@ -63,6 +65,51 @@ class AppState: ObservableObject {
         self.showVisualAlert = UserDefaults.standard.object(forKey: "showVisualAlert") as? Bool ?? true
         self.standingIcon = UserDefaults.standard.string(forKey: "standingIcon") ?? "🧍"
         self.sittingIcon  = UserDefaults.standard.string(forKey: "sittingIcon")  ?? "🪑"
+        if #available(macOS 13.0, *) {
+            self.launchAtLogin = SMAppService.mainApp.status == .enabled
+        } else {
+            self.launchAtLogin = FileManager.default.fileExists(atPath: AppState.launchAgentPlistURL.path)
+        }
+    }
+
+    private static var launchAgentPlistURL: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/LaunchAgents/com.user.Ascend.plist")
+    }
+
+    private func setLaunchAtLogin(_ enabled: Bool) {
+        if #available(macOS 13.0, *) {
+            do {
+                if enabled {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                DispatchQueue.main.async { self.launchAtLogin = !enabled }
+                let alert = NSAlert()
+                alert.messageText = "Could not update login item"
+                alert.informativeText = error.localizedDescription
+                alert.runModal()
+            }
+        } else {
+            let url = AppState.launchAgentPlistURL
+            if enabled {
+                guard let execPath = Bundle.main.executablePath else { return }
+                let plist: [String: Any] = [
+                    "Label": "com.user.Ascend",
+                    "ProgramArguments": [execPath],
+                    "RunAtLoad": true
+                ]
+                try? FileManager.default.createDirectory(
+                    at: url.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
+                (plist as NSDictionary).write(to: url, atomically: true)
+            } else {
+                try? FileManager.default.removeItem(at: url)
+            }
+        }
     }
 
     func playSound(forStanding: Bool) {
