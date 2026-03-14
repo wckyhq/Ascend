@@ -18,10 +18,8 @@ Ascend will remind you to stand/sit (default is 30 minute intervals). That's it!
 
 ## To-Do
 
-- [ ] Individual intervals between sitting and standing (e.g. stand for 30 minutes then sit for 20).
-- [ ] Retain time left after pausing.
 - [ ] Better notification styling.
 
 ## AI Disclosure
 
-During the creation process of Ascend, I used Claude Code from start to finish. This project was a test of Claude's abilities, and while I am pleased with the result, it has actually made me want to create code on my own rather than fully relying on AI. 
+During the creation process of Ascend, I used Claude Code from start to finish. This project was a test of Claude's abilities, and while I am pleased with the result, it has actually made me want to create code on my own rather than fully relying on AI.
