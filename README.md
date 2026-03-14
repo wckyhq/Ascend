@@ -12,9 +12,10 @@ Ascend will remind you to stand/sit (default is 30 minute intervals). That's it!
 
 1. Download the latest release from the [releases page](https://github.com/wckyhq/Ascend/releases).
 2. Install the application like you would any other MacOS app.
-3. Launch Ascend.
-4. Configure your preferred intervals, sounds, and icons.
-5. Finally use that standing desk!
+3. Open System Settings, scroll to "Privacy & Security", scroll to the bottom of the page and press "Open Anyway". 
+4. Launch Ascend.
+5. Configure your preferred intervals, sounds, and icons.
+6. Finally use that standing desk!
 
 ## To-Do
 
