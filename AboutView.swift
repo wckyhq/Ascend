@@ -4,23 +4,33 @@ import SwiftUI
 private let kAuthorName   = "Built by George"
 private let kAuthorBio    = "Fully Open-Source"
 private let kGitHubURL    = "https://github.com/wckyhq/Ascend"
-private let kAppVersion   = "1.0.0"
 // ─────────────────────────────────────────────────────────────────────────────
 
 struct AboutView: View {
     let onClose: () -> Void
 
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 8) {
-                Text("❤️")
-                    .font(.system(size: 52))
-                    .padding(.top, 24)
+                if let icon = NSImage(named: "AppIcon") {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .frame(width: 64, height: 64)
+                        .padding(.top, 20)
+                } else {
+                    Image(systemName: "figure.stand")
+                        .font(.system(size: 52))
+                        .padding(.top, 24)
+                }
 
                 Text("Ascend")
                     .font(.title3.bold())
 
-                Text("Version \(kAppVersion)")
+                Text("Version \(appVersion)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.bottom, 20)

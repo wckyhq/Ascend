@@ -29,6 +29,9 @@ class AppState: ObservableObject {
     @Published var showVisualAlert: Bool {
         didSet { UserDefaults.standard.set(showVisualAlert, forKey: "showVisualAlert") }
     }
+    @Published var showCountdownInMenuBar: Bool {
+        didSet { UserDefaults.standard.set(showCountdownInMenuBar, forKey: "showCountdownInMenuBar") }
+    }
     @Published var standingIcon: String {
         didSet { UserDefaults.standard.set(standingIcon, forKey: "standingIcon") }
     }
@@ -72,6 +75,7 @@ class AppState: ObservableObject {
         self.sitSoundName   = UserDefaults.standard.string(forKey: "sitSoundName")   ?? legacySound
 
         self.showVisualAlert = UserDefaults.standard.object(forKey: "showVisualAlert") as? Bool ?? true
+        self.showCountdownInMenuBar = UserDefaults.standard.object(forKey: "showCountdownInMenuBar") as? Bool ?? false
         self.standingIcon = UserDefaults.standard.string(forKey: "standingIcon") ?? "🧍"
         self.sittingIcon  = UserDefaults.standard.string(forKey: "sittingIcon")  ?? "🪑"
         if #available(macOS 13.0, *) {

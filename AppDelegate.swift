@@ -27,10 +27,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startReminderTimer()
         startCountdownTimer()
 
-        appState.$isStanding.sink  { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
-        appState.$isRunning.sink   { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
-        appState.$standingIcon.sink { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
-        appState.$sittingIcon.sink  { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
+        appState.$isStanding.sink            { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
+        appState.$isRunning.sink             { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
+        appState.$standingIcon.sink          { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
+        appState.$sittingIcon.sink           { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
+        appState.$showCountdownInMenuBar.sink { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
     }
 
 
@@ -46,9 +47,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func refreshStatusButton() {
         DispatchQueue.main.async {
-            self.statusItem.button?.title = self.appState.isRunning
-                ? self.appState.currentIcon
-                : "⏸"
+            guard let button = self.statusItem.button else { return }
+            if !self.appState.isRunning {
+                button.title = "⏸"
+            } else if self.appState.showCountdownInMenuBar, !self.appState.countdownText.isEmpty {
+                button.title = "\(self.appState.currentIcon) \(self.appState.countdownText)"
+            } else {
+                button.title = self.appState.currentIcon
+            }
         }
     }
 
@@ -213,7 +219,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func startCountdownTimer() {
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.appState.updateCountdown(nextDate: self?.nextReminderDate)
+            guard let self else { return }
+            self.appState.updateCountdown(nextDate: self.nextReminderDate)
+            if self.appState.showCountdownInMenuBar { self.refreshStatusButton() }
         }
     }
 
