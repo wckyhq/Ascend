@@ -14,6 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindow: NSWindow?
     private var aboutWindow: NSWindow?
     private var nextReminderDate: Date?
+    private var pausedRemainingInterval: TimeInterval?
     private var cancellables = Set<AnyCancellable>()
 
     let appState = AppState()
@@ -139,14 +140,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func startReminderTimer() {
         reminderTimer?.invalidate()
         appState.isRunning = true
-        nextReminderDate = Date().addingTimeInterval(appState.interval)
-        reminderTimer = Timer.scheduledTimer(withTimeInterval: appState.interval, repeats: true) { [weak self] _ in
-            self?.fireReminder()
+
+        let delay = pausedRemainingInterval ?? appState.currentInterval
+        pausedRemainingInterval = nil
+        nextReminderDate = Date().addingTimeInterval(delay)
+
+        reminderTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            self.fireReminder()
+            self.scheduleNextReminder()
         }
         refreshStatusButton()
     }
 
     func stopReminderTimer() {
+        if let next = nextReminderDate {
+            let remaining = next.timeIntervalSinceNow
+            pausedRemainingInterval = remaining > 0 ? remaining : nil
+        }
         reminderTimer?.invalidate()
         reminderTimer = nil
         nextReminderDate = nil
@@ -163,21 +174,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         fireReminder()
         if appState.isRunning {
             reminderTimer?.invalidate()
-            nextReminderDate = Date().addingTimeInterval(appState.interval)
-            reminderTimer = Timer.scheduledTimer(withTimeInterval: appState.interval, repeats: true) { [weak self] _ in
-                self?.fireReminder()
-            }
+            scheduleNextReminder()
+        }
+    }
+
+    private func scheduleNextReminder() {
+        let interval = appState.currentInterval
+        nextReminderDate = Date().addingTimeInterval(interval)
+        reminderTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            self.fireReminder()
+            self.scheduleNextReminder()
         }
     }
 
     private func fireReminder() {
+        let prevMins = Int(appState.currentInterval / 60)
         appState.isStanding.toggle()
 
-        let mins  = Int(appState.intervalMinutes)
         let title = appState.isStanding ? "Time to Stand Up!" : "Time to Sit Down!"
         let body  = appState.isStanding
-            ? "You've been sitting for \(mins) minutes — time to stand!"
-            : "You've been standing for \(mins) minutes — take a seat!"
+            ? "You've been sitting for \(prevMins) minutes — time to stand!"
+            : "You've been standing for \(prevMins) minutes — take a seat!"
 
         appState.playSound(forStanding: appState.isStanding)
 
@@ -189,7 +207,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSAppleScript(source: "display notification \"\(b)\" with title \"\(t)\"")?.executeAndReturnError(nil)
         }
 
-        nextReminderDate = Date().addingTimeInterval(appState.interval)
         refreshStatusButton()
     }
 

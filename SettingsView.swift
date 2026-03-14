@@ -33,18 +33,13 @@ struct SettingsView: View {
 
     private var intervalSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Reminder Interval", systemImage: "timer")
+            Label("Reminder Intervals", systemImage: "timer")
                 .font(.headline)
 
-            HStack(spacing: 10) {
-                Slider(value: $appState.intervalMinutes, in: 5...120, step: 5)
-                Text("\(Int(appState.intervalMinutes)) min")
-                    .monospacedDigit()
-                    .foregroundColor(.secondary)
-                    .frame(width: 52, alignment: .trailing)
-            }
+            IntervalSliderRow(label: "🧍 Standing", value: $appState.standIntervalMinutes)
+            IntervalSliderRow(label: "🪑 Sitting",  value: $appState.sitIntervalMinutes)
 
-            Text("Alternates between standing and sitting every \(Int(appState.intervalMinutes)) minutes.")
+            Text("Switch to standing after sitting for \(Int(appState.sitIntervalMinutes)) min, and sit after standing for \(Int(appState.standIntervalMinutes)) min.")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -196,6 +191,24 @@ struct SoundPickerRow: View {
             .onChange(of: selection) {
                 AppState.play(selection)
             }
+        }
+    }
+}
+
+struct IntervalSliderRow: View {
+    let label: String
+    @Binding var value: Double
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text(label)
+                .foregroundColor(.secondary)
+                .frame(width: 100, alignment: .leading)
+            Slider(value: $value, in: 5...120, step: 5)
+            Text("\(Int(value)) min")
+                .monospacedDigit()
+                .foregroundColor(.secondary)
+                .frame(width: 52, alignment: .trailing)
         }
     }
 }

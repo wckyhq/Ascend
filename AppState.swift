@@ -14,8 +14,11 @@ class AppState: ObservableObject {
     @Published var isRunning: Bool = true
     @Published var countdownText: String = ""
 
-    @Published var intervalMinutes: Double {
-        didSet { UserDefaults.standard.set(intervalMinutes, forKey: "intervalMinutes") }
+    @Published var standIntervalMinutes: Double {
+        didSet { UserDefaults.standard.set(standIntervalMinutes, forKey: "standIntervalMinutes") }
+    }
+    @Published var sitIntervalMinutes: Double {
+        didSet { UserDefaults.standard.set(sitIntervalMinutes, forKey: "sitIntervalMinutes") }
     }
     @Published var standSoundName: String {
         didSet { UserDefaults.standard.set(standSoundName, forKey: "standSoundName") }
@@ -36,7 +39,9 @@ class AppState: ObservableObject {
         didSet { setLaunchAtLogin(launchAtLogin) }
     }
 
-    var interval: TimeInterval { intervalMinutes * 60 }
+    var standInterval: TimeInterval { standIntervalMinutes * 60 }
+    var sitInterval: TimeInterval { sitIntervalMinutes * 60 }
+    var currentInterval: TimeInterval { isStanding ? standInterval : sitInterval }
     var currentIcon: String { isStanding ? standingIcon : sittingIcon }
 
     static let availableSounds: [String] = [
@@ -55,12 +60,16 @@ class AppState: ObservableObject {
     ]
 
     init() {
-        let saved = UserDefaults.standard.double(forKey: "intervalMinutes")
-        self.intervalMinutes = saved > 0 ? saved : 30
+        let legacy = UserDefaults.standard.double(forKey: "intervalMinutes")
+        let fallback = legacy > 0 ? legacy : 30
+        let savedStand = UserDefaults.standard.double(forKey: "standIntervalMinutes")
+        let savedSit   = UserDefaults.standard.double(forKey: "sitIntervalMinutes")
+        self.standIntervalMinutes = savedStand > 0 ? savedStand : fallback
+        self.sitIntervalMinutes   = savedSit   > 0 ? savedSit   : fallback
 
-        let legacy = UserDefaults.standard.string(forKey: "soundName") ?? "Ping"
-        self.standSoundName = UserDefaults.standard.string(forKey: "standSoundName") ?? legacy
-        self.sitSoundName   = UserDefaults.standard.string(forKey: "sitSoundName")   ?? legacy
+        let legacySound = UserDefaults.standard.string(forKey: "soundName") ?? "Ping"
+        self.standSoundName = UserDefaults.standard.string(forKey: "standSoundName") ?? legacySound
+        self.sitSoundName   = UserDefaults.standard.string(forKey: "sitSoundName")   ?? legacySound
 
         self.showVisualAlert = UserDefaults.standard.object(forKey: "showVisualAlert") as? Bool ?? true
         self.standingIcon = UserDefaults.standard.string(forKey: "standingIcon") ?? "🧍"
