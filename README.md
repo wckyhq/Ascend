@@ -1,5 +1,3 @@
-<img src="/misc/Ascend.png" alt="Ascend Logo" style="width:512px;height5120px;">
-
 # Ascend
 
 **A free and open source reminder to use that standing desk!**
