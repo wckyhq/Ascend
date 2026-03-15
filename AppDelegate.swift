@@ -13,6 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var countdownTimer: Timer?
     private var settingsWindow: NSWindow?
     private var aboutWindow: NSWindow?
+    private var onboardingWindow: NSWindow?
     private var nextReminderDate: Date?
     private var pausedRemainingInterval: TimeInterval?
     private var cancellables = Set<AnyCancellable>()
@@ -27,17 +28,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startReminderTimer()
         startCountdownTimer()
 
+        // Show onboarding on first launch or new version
+        let current      = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        let lastOnboarded = UserDefaults.standard.string(forKey: "lastOnboardedVersion")
+        if lastOnboarded != current {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.openOnboarding(isFirstLaunch: lastOnboarded == nil)
+            }
+        }
+
         appState.$isStanding.sink            { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
         appState.$isRunning.sink             { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
         appState.$standingIcon.sink          { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
         appState.$sittingIcon.sink           { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
         appState.$showCountdownInMenuBar.sink { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
+        appState.$pauseIcon.sink            { [weak self] _ in self?.refreshStatusButton() }.store(in: &cancellables)
     }
 
 
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
+            button.font = .monospacedDigitSystemFont(ofSize: 14, weight: .regular)
             button.title = appState.currentIcon
             button.action = #selector(handleClick)
             button.target = self
@@ -48,9 +60,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func refreshStatusButton() {
         DispatchQueue.main.async {
             guard let button = self.statusItem.button else { return }
+            let showCountdown = self.appState.showCountdownInMenuBar
+                                && self.appState.isRunning
+                                && !self.appState.countdownText.isEmpty
             if !self.appState.isRunning {
-                button.title = "⏸"
-            } else if self.appState.showCountdownInMenuBar, !self.appState.countdownText.isEmpty {
+                button.title = self.appState.pauseIcon
+            } else if showCountdown {
                 button.title = "\(self.appState.currentIcon) \(self.appState.countdownText)"
             } else {
                 button.title = self.appState.currentIcon
@@ -241,7 +256,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defer: false
         )
         p.contentView = hosting
-        p.backgroundColor = NSColor.clear
+        p.backgroundColor = .clear
         p.isOpaque = false
         p.hasShadow = true
         p.level = NSWindow.Level.floating
@@ -274,6 +289,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
 
+    func openOnboarding(isFirstLaunch: Bool) {
+        if onboardingWindow == nil {
+            let view = OnboardingView(appState: appState, isFirstLaunch: isFirstLaunch) { [weak self] in
+                guard let self else { return }
+                self.markOnboardingComplete()
+                self.onboardingWindow?.orderOut(nil)
+            }
+            let controller = NSHostingController(rootView: view)
+            let window = NSWindow(contentViewController: controller)
+            window.title = isFirstLaunch ? "Welcome to Ascend" : "What's New in Ascend"
+            window.styleMask = [.titled, .closable]
+            window.isReleasedWhenClosed = false
+            window.delegate = self
+            if #available(macOS 26, *) {
+                window.backgroundColor = .clear
+                window.isOpaque = false
+            }
+            onboardingWindow = window
+        }
+        onboardingWindow?.center()
+        onboardingWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func markOnboardingComplete() {
+        let current = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        UserDefaults.standard.set(current, forKey: "lastOnboardedVersion")
+    }
+
     func openAbout() {
         hidePanel()
 
@@ -284,6 +328,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = "About"
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false
+            if #available(macOS 26, *) {
+                window.backgroundColor = .clear
+                window.isOpaque = false
+            }
             aboutWindow = window
         }
 
@@ -308,11 +356,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = "Ascend — Settings"
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false
+            if #available(macOS 26, *) {
+                window.backgroundColor = .clear
+                window.isOpaque = false
+            }
             settingsWindow = window
         }
 
         settingsWindow?.center()
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
+
+extension AppDelegate: NSWindowDelegate {
+    func windowWillClose(_ notification: Notification) {
+        guard (notification.object as? NSWindow) === onboardingWindow else { return }
+        markOnboardingComplete()
     }
 }

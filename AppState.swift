@@ -7,6 +7,7 @@ struct IconPreset: Identifiable {
     let label: String
     let standing: String
     let sitting: String
+    let pause: String
 }
 
 class AppState: ObservableObject {
@@ -38,6 +39,9 @@ class AppState: ObservableObject {
     @Published var sittingIcon: String {
         didSet { UserDefaults.standard.set(sittingIcon, forKey: "sittingIcon") }
     }
+    @Published var pauseIcon: String {
+        didSet { UserDefaults.standard.set(pauseIcon, forKey: "pauseIcon") }
+    }
     @Published var launchAtLogin: Bool {
         didSet { setLaunchAtLogin(launchAtLogin) }
     }
@@ -54,12 +58,12 @@ class AppState: ObservableObject {
     ]
 
     static let iconPresets: [IconPreset] = [
-        IconPreset(label: "Person",   standing: "🧍", sitting: "🪑"),
-        IconPreset(label: "Arrows",   standing: "⬆️", sitting: "⬇️"),
-        IconPreset(label: "Energy",   standing: "⚡",  sitting: "💤"),
-        IconPreset(label: "Nature",   standing: "🌿", sitting: "🍃"),
-        IconPreset(label: "Minimal",  standing: "▲",  sitting: "▼"),
-        IconPreset(label: "Circles",  standing: "🟢", sitting: "🔵"),
+        IconPreset(label: "Person",  standing: "🧍", sitting: "🪑", pause: "🧘"),
+        IconPreset(label: "Arrows",  standing: "⬆️", sitting: "⬇️", pause: "⏸️"),
+        IconPreset(label: "Energy",  standing: "⚡",  sitting: "💤", pause: "🔋"),
+        IconPreset(label: "Nature",  standing: "🌿", sitting: "🍃", pause: "🍂"),
+        IconPreset(label: "Minimal", standing: "▲",  sitting: "▼",  pause: "■"),
+        IconPreset(label: "Circles", standing: "🟢", sitting: "🔵", pause: "⚫"),
     ]
 
     init() {
@@ -76,8 +80,9 @@ class AppState: ObservableObject {
 
         self.showVisualAlert = UserDefaults.standard.object(forKey: "showVisualAlert") as? Bool ?? true
         self.showCountdownInMenuBar = UserDefaults.standard.object(forKey: "showCountdownInMenuBar") as? Bool ?? false
-        self.standingIcon = UserDefaults.standard.string(forKey: "standingIcon") ?? "🧍"
-        self.sittingIcon  = UserDefaults.standard.string(forKey: "sittingIcon")  ?? "🪑"
+        self.standingIcon = UserDefaults.standard.string(forKey: "standingIcon") ?? "▲"
+        self.sittingIcon  = UserDefaults.standard.string(forKey: "sittingIcon")  ?? "▼"
+        self.pauseIcon    = UserDefaults.standard.string(forKey: "pauseIcon")    ?? "■"
         if #available(macOS 13.0, *) {
             self.launchAtLogin = SMAppService.mainApp.status == .enabled
         } else {

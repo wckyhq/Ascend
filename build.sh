@@ -21,6 +21,7 @@ swiftc \
   "$SCRIPT_DIR/SettingsView.swift" \
   "$SCRIPT_DIR/AlertOverlayView.swift" \
   "$SCRIPT_DIR/AboutView.swift" \
+  "$SCRIPT_DIR/OnboardingView.swift" \
   -o "$CONTENTS/MacOS/$APP_NAME" \
   -framework Cocoa \
   -framework SwiftUI \
@@ -29,6 +30,7 @@ swiftc \
 
 cp "$SCRIPT_DIR/Info.plist" "$CONTENTS/Info.plist"
 cp "$SCRIPT_DIR/Ascend.icns" "$CONTENTS/Resources/Ascend.icns"
+cp "$SCRIPT_DIR/misc/Ascend.png" "$CONTENTS/Resources/Ascend.png"
 
 # Ad-hoc sign so SMAppService can register a login item
 codesign --sign - --force --deep "$APP_BUNDLE"
