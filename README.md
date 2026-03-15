@@ -22,10 +22,10 @@ Ascend will remind you to stand/sit (default is 30 minute intervals). That's it!
 ## To-Do
 
 - [ ] Better notification styling.
-- [ ] New settings menu.
-- [ ] Liquid Glass
-- [ ] New pause icon.
-- [ ] In-app updates.
+- [x] New settings menu.
+- [x] Liquid Glass
+- [x] New pause icon.
+- [x] In-app updates.
 
 ## AI Disclosure
 
