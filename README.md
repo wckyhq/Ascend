@@ -2,6 +2,8 @@
 
 **A free and open source reminder to use that standing desk!**
 
+<img src="/misc/Ascend-01.png" alt="Ascend-Banner">
+
 Ascend is a MacOS application that lives in your menu bar. You can configure time between standing/sitting, the icon on the menu bar, and the sound either state makes.
 
 ## How It Works
