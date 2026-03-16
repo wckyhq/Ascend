@@ -77,13 +77,7 @@ struct SettingsView: View {
                 UpdateDialogView(tag: tag, downloadURL: url, isPresented: $showUpdateSheet)
             }
         }
-        .background {
-            if #available(macOS 26, *) {
-                Rectangle().fill(.regularMaterial).ignoresSafeArea()
-            } else {
-                Color(NSColor.windowBackgroundColor).ignoresSafeArea()
-            }
-        }
+        .background(Color(NSColor.windowBackgroundColor).ignoresSafeArea())
     }
 
     // MARK: - Sidebar

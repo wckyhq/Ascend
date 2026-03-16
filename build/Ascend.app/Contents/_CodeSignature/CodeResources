@@ -8,6 +8,10 @@
 		<data>
 		hi4DpCRiGt29ZBSR2bl1/lzddw8=
 		</data>
+		<key>Resources/Ascend.png</key>
+		<data>
+		hPAt+ixwXR2CPYzh8i5s9414Mlg=
+		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
@@ -16,6 +20,13 @@
 			<key>hash2</key>
 			<data>
 			Y+/NhakRHEjzanI+61cSSiDcT+5CuUvo4fBABw3+2Hs=
+			</data>
+		</dict>
+		<key>Resources/Ascend.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			9Oz3Z2K3Mc6rUjxWBILr4ZHyA7hnJEfwWFT1pjWLMY8=
 			</data>
 		</dict>
 	</dict>

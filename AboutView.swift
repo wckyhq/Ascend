@@ -16,7 +16,7 @@ struct AboutView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 8) {
-                if let icon = NSImage(named: "AppIcon") {
+                if let icon = NSImage(named: "Ascend") {
                     Image(nsImage: icon)
                         .resizable()
                         .frame(width: 64, height: 64)
@@ -80,6 +80,7 @@ struct AboutView: View {
             .padding(.vertical, 12)
         }
         .frame(width: 300)
+        .background(Color(NSColor.windowBackgroundColor).ignoresSafeArea())
     }
 
     private func openGitHub() {
