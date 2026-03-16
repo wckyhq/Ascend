@@ -51,18 +51,30 @@ class AppState: ObservableObject {
     var currentInterval: TimeInterval { isStanding ? standInterval : sitInterval }
     var currentIcon: String { isStanding ? standingIcon : sittingIcon }
 
-    static let availableSounds: [String] = [
-        "None", "Basso", "Blow", "Bottle", "Frog",
-        "Funk", "Glass", "Hero", "Morse", "Ping",
-        "Pop", "Purr", "Sosumi", "Submarine", "Tink"
-    ]
+    static let availableSounds: [String] = {
+        let dirs = [
+            "/System/Library/Sounds",
+            "/Library/Sounds",
+            NSHomeDirectory() + "/Library/Sounds"
+        ]
+        var names = Set<String>()
+        for dir in dirs {
+            if let files = try? FileManager.default.contentsOfDirectory(atPath: dir) {
+                for file in files {
+                    let name = (file as NSString).deletingPathExtension
+                    if !name.isEmpty { names.insert(name) }
+                }
+            }
+        }
+        return ["None"] + names.sorted()
+    }()
 
     static let iconPresets: [IconPreset] = [
         IconPreset(label: "Person",  standing: "🧍", sitting: "🪑", pause: "🧘"),
         IconPreset(label: "Arrows",  standing: "⬆️", sitting: "⬇️", pause: "⏸️"),
         IconPreset(label: "Energy",  standing: "⚡",  sitting: "💤", pause: "🔋"),
         IconPreset(label: "Nature",  standing: "🌿", sitting: "🍃", pause: "🍂"),
-        IconPreset(label: "Minimal", standing: "▲",  sitting: "▼",  pause: "■"),
+        IconPreset(label: "Minimal", standing: "↑",  sitting: "↓",  pause: "✕"),
         IconPreset(label: "Circles", standing: "🟢", sitting: "🔵", pause: "⚫"),
     ]
 
@@ -80,9 +92,9 @@ class AppState: ObservableObject {
 
         self.showVisualAlert = UserDefaults.standard.object(forKey: "showVisualAlert") as? Bool ?? true
         self.showCountdownInMenuBar = UserDefaults.standard.object(forKey: "showCountdownInMenuBar") as? Bool ?? false
-        self.standingIcon = UserDefaults.standard.string(forKey: "standingIcon") ?? "▲"
-        self.sittingIcon  = UserDefaults.standard.string(forKey: "sittingIcon")  ?? "▼"
-        self.pauseIcon    = UserDefaults.standard.string(forKey: "pauseIcon")    ?? "■"
+        self.standingIcon = UserDefaults.standard.string(forKey: "standingIcon") ?? "↑"
+        self.sittingIcon  = UserDefaults.standard.string(forKey: "sittingIcon")  ?? "↓"
+        self.pauseIcon    = UserDefaults.standard.string(forKey: "pauseIcon")    ?? "✕"
         if #available(macOS 13.0, *) {
             self.launchAtLogin = SMAppService.mainApp.status == .enabled
         } else {
